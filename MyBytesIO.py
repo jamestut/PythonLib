@@ -32,8 +32,9 @@ class BIO(RawIOBase):
 		return self._pos
 
 	def set_limit(self, lim=None):
-		if lim < 0 or lim > len(self._data):
-			raise ValueError("Limit must be at most current size")
+		if lim is not None:
+			if lim < 0 or lim > len(self._data):
+				raise ValueError("Limit must be at most current size")
 		self._limit = lim
 
 	def seek(self, pos, whence=0):
@@ -45,8 +46,12 @@ class BIO(RawIOBase):
 			pos = len(self) + pos
 		else:
 			raise ValueError("Unsupported whence")
-		if pos >= len(self) or pos < 0:
+
+		if not pos and not len(self):
+			pass
+		elif pos > len(self) or pos < 0:
 			raise ValueError("Invalid resulting position")
+
 		self._pos = pos
 
 	def read(self, size=-1):
