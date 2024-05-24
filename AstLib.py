@@ -1,10 +1,22 @@
 class AstContentGetter:
+    '''
+    A class to get the code of an AST node parsed from the given file.
+    This is the same in function as ast.get_source_segment, but avoids
+    repeatedly splitting the lines.
+    '''
     def __init__(self, data: str):
+        '''
+        Initialise this class with the contents of the source file that was
+        passed to the ast.parse().
+        '''
         self._lines = data.splitlines()
 
     def get(self, v) -> str:
-        # linenos are 1-based
-
+        '''
+        Returns the snippet of the source code that represents the given
+        ast.parse() node.
+        '''
+        # lineno is 1-based, but col_offset is 0-based
         first_line = self._lines[v.lineno - 1]
 
         if v.end_lineno == v.lineno:
