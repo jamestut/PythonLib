@@ -1,13 +1,19 @@
 from __future__ import absolute_import, division, print_function
-import TerminalUtil
 import sys
+import termios
+import struct
+import fcntl
 
 class ProgressPrinter():
    def __init__(self):
       self._prev = ""
-      self.istty = TerminalUtil.isTerminalRealSafe()
-      if self.istty:
-         _, self._cols, _, _ = TerminalUtil.ioctl_GWINSZ();
+      _, self._cols, _, _ = ioctl_GWINSZ()
+      if self._cols == 0:
+         # default safe size
+         self._cols = 80
+         self.istty = False
+      else:
+         self.istty = True
 
    def pp(self, msg):
       if not self.istty:
@@ -28,3 +34,13 @@ class ProgressPrinter():
       if self.istty:
          print()
          self._prev = ""
+
+def ioctl_GWINSZ():
+   for f in ( sys.stdin, sys.stdout, sys.stderr ):
+      try:
+         fd = f.fileno()
+         return struct.unpack( 'HHHH', fcntl.ioctl( fd, termios.TIOCGWINSZ,
+                               '12345678' ) )
+      except:
+         pass
+   return ( 0, 0, 0, 0 )
